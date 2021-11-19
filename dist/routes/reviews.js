@@ -7,7 +7,7 @@ exports.reviewsRoutes = reviewsRoutes;
 
 var _express = _interopRequireDefault(require("express"));
 
-var _db = _interopRequireDefault(require("../db"));
+var _db = require("../db");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22,7 +22,15 @@ function reviewsRoutes() {
 
 async function postReview(req, res) {
   const review = req.body;
-  console.log(review); // db.save(review);
+  console.log(review);
+  const {
+    rating,
+    recommend,
+    characteristics
+  } = review;
+
+  _db.db.saveReview(review); //also increment meta info
+
 
   res.send('inserted review');
 }

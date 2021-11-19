@@ -13,7 +13,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function startServer(port = process.env.PORT || 3000) {
   const app = (0, _express.default)();
-  console.log(process.env.PORT);
+  app.use(_express.default.urlencoded({
+    extended: true
+  }));
+  app.use(_express.default.json());
   app.use('/', (0, _routes.getRoutes)());
   return new Promise(resolve => {
     const server = app.listen(port, () => {
