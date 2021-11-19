@@ -95,6 +95,51 @@ CREATE TABLE ReviewsMeta (
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+ -- ---
+ -- ETL
+ --
+ -- ---
+
+  -- ---
+ -- Load characteristics
+ --
+ -- ---
+LOAD DATA LOCAL INFILE '/Users/zacharia/Documents/code/HackReactor/atelier-reviews/flat_files/characteristics.csv' INTO TABLE characteristics
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"' 
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+ -- ---
+ -- Load reviews
+ --
+ -- ---
+LOAD DATA LOCAL INFILE '/Users/zacharia/Documents/code/HackReactor/atelier-reviews/flat_files/reviews.csv' INTO TABLE reviews
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"' 
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+ -- ---
+ -- Load reviews_caharcteristics
+ --
+ -- ---
+LOAD DATA LOCAL INFILE '/Users/zacharia/Documents/code/HackReactor/atelier-reviews/flat_files/reviews_characteristics.csv' INTO TABLE reviews_characteristics
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"' 
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+ -- ---
+ -- Load photos
+ --
+ -- ---
+LOAD DATA LOCAL INFILE '/Users/zacharia/Documents/code/HackReactor/atelier-reviews/flat_files/photos.csv' INTO TABLE photos
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"' 
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
 
 
 
