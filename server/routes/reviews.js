@@ -1,5 +1,5 @@
 import express from 'express';
-import {db} from '../db';
+import db from '../../database/db';
 
 function reviewsRoutes() {
   const router = express.Router();
@@ -21,8 +21,8 @@ async function postReview(req, res) {
 }
 
 async function getReviews(req, res) {
-  const message = 'hello you have reached reviews';
-  res.send(message);
+  const reviews = await db.getReviews(req.query);
+  res.send(reviews);
 }
 
 async function doSomethingElse(req, res) {

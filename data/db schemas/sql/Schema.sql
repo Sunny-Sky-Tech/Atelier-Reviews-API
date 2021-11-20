@@ -17,8 +17,8 @@ CREATE TABLE reviews (
   product_id INTEGER NOT NULL,
   rating SMALLINT NOT NULL,
   date BIGINT NULL DEFAULT NULL,
-  summary VARCHAR(100) NULL DEFAULT NULL,
-  body VARCHAR(250) NULL DEFAULT NULL,
+  summary VARCHAR(150) NULL DEFAULT NULL,
+  body VARCHAR(500) NULL DEFAULT NULL,
   recommend TINYINT NULL DEFAULT NULL,
   reported TINYINT NULL DEFAULT 0,
   reviewer_name VARCHAR(50) NOT NULL,
@@ -38,7 +38,7 @@ DROP TABLE IF EXISTS characteristics;
 CREATE TABLE characteristics (
   id INTEGER NOT NULL AUTO_INCREMENT,
   product_id INTEGER NOT NULL,
-  name VARCHAR(50) NOT NULL,
+  name VARCHAR(20) NOT NULL,
   PRIMARY KEY (id)
 );
 
@@ -50,10 +50,11 @@ CREATE TABLE characteristics (
 DROP TABLE IF EXISTS reviews_characteristics;
 
 CREATE TABLE reviews_characteristics (
+  id INTEGER NOT NULL AUTO_INCREMENT,
   characteristic_id INTEGER NOT NULL,
   review_id INTEGER NOT NULL,
   value INTEGER NOT NULL,
-  PRIMARY KEY (characteristic_id, review_id),
+  PRIMARY KEY (id),
   FOREIGN KEY (review_id) REFERENCES reviews(id),
   FOREIGN KEY (characteristic_id) REFERENCES characteristics(id)
 );
@@ -94,7 +95,3 @@ CREATE TABLE ReviewsMeta (
 );
 
 SET FOREIGN_KEY_CHECKS = 0;
-
-
-
-

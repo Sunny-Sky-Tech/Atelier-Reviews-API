@@ -7,7 +7,7 @@ exports.reviewsRoutes = reviewsRoutes;
 
 var _express = _interopRequireDefault(require("express"));
 
-var _db = require("../db");
+var _db = _interopRequireDefault(require("../../database/db"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -29,15 +29,16 @@ async function postReview(req, res) {
     characteristics
   } = review;
 
-  _db.db.saveReview(review); //also increment meta info
+  _db.default.saveReview(review); //also increment meta info
 
 
   res.send('inserted review');
 }
 
-async function getReviews(req, res) {
-  const message = 'hello you have reached reviews';
-  res.send(message);
+function getReviews(req, res) {
+  const reviews = _db.default.getReviews();
+
+  res.send('what');
 }
 
 async function doSomethingElse(req, res) {
