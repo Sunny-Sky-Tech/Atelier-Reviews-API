@@ -2,7 +2,7 @@ import express from 'express';
 
 import {getRoutes} from './routes';
 
-function startServer(port = process.env.PORT || 3000) {
+function startServer({port = process.env.PORT} = {}) {
   const app = express();
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
@@ -11,7 +11,16 @@ function startServer(port = process.env.PORT || 3000) {
 
   return new Promise(resolve => {
     const server = app.listen(port, () => {
-      console.log(`listening on http://localhost:${port}`)
+      console.log(`listening on http://localhost:${server.address().port}`);
+
+      const originalClose = server.close.bind(server);
+      server.close = () => {
+        return new Promise(resolveClose => {
+          originalClose(resolveClose);
+        })
+      }
+
+      resolve(server);
     })
   })
 }

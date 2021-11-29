@@ -17,11 +17,13 @@ IGNORE 1 LINES;
  -- Load reviews
  --
  -- ---
-LOAD DATA LOCAL INFILE '/Users/zacharia/Documents/code/HackReactor/atelier-reviews/data/flat_files/reviews.csv' INTO TABLE reviews
+LOAD DATA LOCAL INFILE '/Users/zacharia/Documents/code/HackReactor/atelier_reviews/data/flat_files/reviews.csv' INTO TABLE reviews
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
-IGNORE 1 LINES;
+IGNORE 1 LINES
+(id, product_id, rating, @date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+SET date = FROM_UNIXTIME( @date / 1000 );
 
  -- ---
  -- Load reviews_caharcteristics
