@@ -2,4 +2,5 @@
 
 var _server = require("./server");
 
-(0, _server.startServer)();
+// import {parseCSV} from '../parseCSV';
+(0, _server.startServer)(); // parseCSV('photos.csv');

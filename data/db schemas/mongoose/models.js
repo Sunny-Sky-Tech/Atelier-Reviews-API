@@ -23,7 +23,6 @@ const reviewSchema = new Schema({
 
 const metaSchema = new Schema({
   product_id: Number,
-  //calculate
   ratings: {
     1: Number,
     2: Number,

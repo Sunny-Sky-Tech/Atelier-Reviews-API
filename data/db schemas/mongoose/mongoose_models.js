@@ -14,23 +14,25 @@ const {
 } = _mongoose.default;
 const reviewSchema = new Schema({
   product_id: Number,
-  review_id: ObjectId,
-  rating: Decimal128,
+  rating: Number,
   summary: String,
   recommend: Boolean,
   response: String,
   body: String,
-  date: Date,
+  date: {
+    type: Date,
+    default: Date.now
+  },
   email: String,
   reviewer_name: String,
   helpfulness: Number,
   photos: [{
-    id: ObjectId,
     url: String
   }]
 });
 const metaSchema = new Schema({
-  product_id: ObjectId,
+  product_id: Number,
+  //calculate
   ratings: {
     1: Number,
     2: Number,
@@ -44,14 +46,8 @@ const metaSchema = new Schema({
   },
   characteristics: Schema.Types.Mixed
 });
-const characteristicSchema = new Schema({
-  characteristic_id: ObjectId,
-  name: String,
-  reviews: [ObjectId]
-});
 const models = {
   Review: _mongoose.default.model('Review', reviewSchema),
-  Meta: _mongoose.default.model('Meta', metaSchema),
-  Characteristic: _mongoose.default.model('Characteristic', characteristicSchema)
+  Meta: _mongoose.default.model('Meta', metaSchema)
 };
 exports.models = models;
