@@ -7,12 +7,15 @@
     "node": "14.17.4"
   },
   "scripts": {
-    "start": "node .",
+    "start": "nodemon index.js",
     "build": "babel --delete-dir-on-start --out-dir dist --copy-files --ignore \"**/__tests__/**,**/__mocks__/**\" --no-copy-ignored server",
-    "test": "jest --detectOpenHandles --watch"
+    "test": "jest --detectOpenHandles --watch",
+    "k6": "k6 run LoadTesting/stressTest.js"
   },
   "dependencies": {
     "axios": "^0.24.0",
+    "compression": "^1.7.4",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "loglevel": "^1.6.8",
@@ -26,7 +29,6 @@
     "@babel/register": "^7.10.4",
     "@fast-csv/parse": "^4.3.6",
     "jest": "^27.3.1",
-    "nodemon": "^2.0.4",
-    "supertest": "^6.1.6"
+    "nodemon": "^2.0.4"
   }
 }

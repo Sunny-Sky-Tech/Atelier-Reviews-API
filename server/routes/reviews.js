@@ -12,42 +12,35 @@ function reviewsRoutes() {
   return router;
 }
 
-async function getReviewsPaginated(req, res) {
-  const {product_id, page, count } = req.query
-  db.getReviewsPaginated(req.query, (err, response) => {
-    if(err) res.status(500).send(err);
-    res.send(response);
-  });
+function getReviewsPaginated(req, res) {
+  const {product_id, page, count } = req.query;
+  db.getReviewsPaginated(req.query)
+    .then((reviews) => res.send({"product": product_id, "page": page, "count": count, "results": reviews[0][0]}))
+    .catch((err) => res.status(500).send(err));
 };
 
-async function getReviewMeta(req, res) {
-  await db.getReviewMeta(req.query)
-    .then((results) => {
-      res.send(results[0][0]);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).send(err);
-    })
+function getReviewMeta(req, res) {
+  db.getReviewMeta(req.query)
+    .then((results) => res.send(results[0][0]))
+    .catch((err) => res.status(500).send(err));
 };
 
-async function postReview(req, res) {
-  db.postReview(req.body, (err) => {
-    if(err) res.status(500).send(err);
-    res.status(201).send('success');
-  });
+function postReview(req, res) {
+  db.postReview(req.body)
+    .then(() => res.status(201).send('success'))
+    .catch((err) => res.status(500).send(err));
 };
 
-async function putHelpfulness(req, res) {
-  await db.putHelpfulness(req.params)
-    .then(() => { res.status(204).send() })
-    .catch((err) => { res.status(500).send(err) });
+function putHelpfulness(req, res) {
+  db.putHelpfulness(req.params)
+    .then(() => res.status(204).send('success'))
+    .catch((err) => res.status(500).send(err));
 };
 
-async function putReported(req, res) {
-  await db.putReported(req.params)
-  .then(() => { res.status(204).send() })
-  .catch((err) => { res.status(500).send(err) });
+function putReported(req, res) {
+  db.putReported(req.params)
+    .then(() => res.status(204).send('success'))
+    .catch((err) => res.status(500).send(err));
 };
 
 

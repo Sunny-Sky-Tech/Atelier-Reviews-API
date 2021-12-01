@@ -1,6 +1,5 @@
 import {startServer} from '../server/server';
 import axios from 'axios';
-// import supertest from 'supertest';
 
 jest.setTimeout(25000);
 let server, baseURL, product_id;
@@ -33,3 +32,4 @@ describe('paginated reviews endpoint', () => {
     expect(response.data.count).toBe(10);
   });
 });
+

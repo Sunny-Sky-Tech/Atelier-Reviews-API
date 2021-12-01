@@ -3,57 +3,9 @@
  --
  -- ---
 
--- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Get Reviews SIMPLE
---
--- ---
-DROP PROCEDURE IF EXISTS getReviewsSimple;
-DELIMITER //
-CREATE PROCEDURE getReviewsSimple(IN productId INT)
-
--- test
--- CALL getReviewsSimple();
-
-BEGIN
-
-  SELECT * FROM reviews
-  WHERE product_id = productId
-  LIMIT 10;
-
-END //
-DELIMITER ;
-
-
+-
 -- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Get Reviews
--- Pagination / Sorting
--- ---
-DROP PROCEDURE IF EXISTS getReviews;
-DELIMITER //
-CREATE PROCEDURE getReviews(IN product_id INT, offset INT, results INT, sort VARCHAR(20))
-
--- test
--- CALL getReviews(999993, 0, 10, 'relevance');
-
-BEGIN
-
-  SELECT r.id, r.rating, r.summary, r.recommend, r.response, r.body, FROM_UNIXTIME(r.date / 1000) AS date, r.reviewer_name, r.helpfulness, p.id, p.url
-
-    FROM reviews r
-    LEFT JOIN photos p ON p.review_id = r.id
-    WHERE r.product_id = product_id
-    ORDER BY
-      CASE WHEN sort = 'newest' THEN date END DESC,
-      CASE WHEN sort = 'helpfulness' THEN helpfulness END DESC,
-      CASE WHEN sort = 'relevance' THEN date END DESC,
-      CASE WHEN sort = 'relevance' THEN helpfulness END DESC
-    LIMIT results OFFSET offset;
-
-END //
-DELIMITER ;
-
--- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Get Reviews TEST
 -- Pagination / Sorting
 -- ---
 DROP PROCEDURE IF EXISTS getReviewsPaginated;
@@ -78,10 +30,11 @@ BEGIN
       SELECT
         JSON_ARRAYAGG(JSON_OBJECT('id', id, 'url', url))
       FROM photos
-      WHERE review_id = r.id
+      WHERE review_id IN (r.id)
     ) AS photos
   FROM reviews r
-  WHERE r.product_id = _product_id
+  WHERE r.product_id IN (_product_id)
+  AND r.reported NOT IN (1)
   ORDER BY
     CASE
       WHEN _sort = 'newest' THEN date
@@ -112,220 +65,53 @@ SELECT
   "1",
     (SELECT COUNT(*)
     FROM reviews r
-    WHERE r.rating = 1
-    AND r.product_id = _product_id),
+    WHERE r.rating IN (1)
+    AND r.product_id IN (_product_id)),
   "2",
     (SELECT COUNT(*)
     FROM reviews r
-    WHERE r.rating = 2
-    AND r.product_id = _product_id),
+    WHERE r.rating IN (2)
+    AND r.product_id IN (_product_id)),
   "3",
     (SELECT COUNT(*)
     FROM reviews r
-    WHERE r.rating = 3
-    AND r.product_id = _product_id),
+    WHERE r.rating IN (3)
+    AND r.product_id IN (_product_id)),
   "4",
     (SELECT COUNT(*)
     FROM reviews r
-    WHERE r.rating = 4
-    AND r.product_id = _product_id),
+    WHERE r.rating IN (4)
+    AND r.product_id IN (_product_id)),
   "5",
     (SELECT COUNT(*)
     FROM reviews r
-    WHERE r.rating = 5
-    AND r.product_id = _product_id)
+    WHERE r.rating IN (5)
+    AND r.product_id IN (_product_id))
 )) AS ratings,
 (SELECT JSON_OBJECT(
   "1",
     (SELECT COUNT(*)
     FROM reviews r
-    WHERE r.recommend = true
-    AND r.product_id = _product_id),
+    WHERE r.recommend IN (1)
+    AND r.product_id IN (_product_id)),
   "0",
     (SELECT COUNT(*)
     FROM reviews r
-    WHERE r.recommend = false
-    AND r.product_id = _product_id)
+    WHERE r.recommend IN (false)
+    AND r.product_id IN (_product_id))
 )) AS recommend,
 (
   SELECT JSON_OBJECTAGG(c.name, JSON_OBJECT('id', c.id, 'value', rc.value))
   FROM characteristics c
   INNER JOIN reviews_characteristics rc
-  ON c.product_id = _product_id
-  AND rc.characteristic_id = c.id
+  ON c.product_id IN (_product_id)
+  AND rc.characteristic_id IN (c.id)
 ) AS characteristics;
 
 END //
 DELIMITER ;
 
--- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- POST Review
---
--- ---
-
-DROP PROCEDURE IF EXISTS postReview;
-DELIMITER //
-CREATE PROCEDURE postReview(
-   IN _product_id INT,
-   IN _rating INT,
-   IN _summary VARCHAR(150),
-   IN _body VARCHAR(500),
-   IN _recommend TINYINT,
-   IN _reviewer_name VARCHAR(50),
-   IN _reviewer_email VARCHAR(100),
-   OUT _Id INT
-)
-
--- test
--- CALL postReview(
---   999993,
---   4,
---   'test summary',
---   'test body',
---   1,
---   'test name',
---   'test@email.com',
---   @Id
--- );
--- SELECT * FROM reviews WHERE id = @Id;
--- DELETE FROM reviews WHERE id = @Id;
--- SELECT * FROM reviews WHERE id = @Id;
-
-BEGIN
-  INSERT INTO reviews (
-      product_id,
-      rating,
-      summary,
-      body,
-      recommend,
-      reviewer_name,
-      reviewer_email
-  )
-
-  VALUES (
-    _product_id,
-    _rating,
-    _summary,
-    _body,
-    _recommend,
-    _reviewer_name,
-    _reviewer_email
-  );
-  SELECT LAST_INSERT_ID() INTO _Id;
-
-END //
-DELIMITER ;
-
- -- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- -- POST photos
  --
- -- ---
-
-DROP PROCEDURE IF EXISTS postPhoto;
-DELIMITER //
-
-CREATE PROCEDURE postPhoto(IN _review_id INT, IN _url VARCHAR(250), OUT _Id INT)
-
--- test
--- CALL postPhoto(
---   10,
---   'testurl.com/testphoto',
---   @Id
--- );
--- SELECT * FROM photos WHERE id = @Id;
--- DELETE FROM photos WHERE id = @Id;
--- SELECT * FROM photos WHERE id = @Id;
-
-BEGIN
-  INSERT INTO photos (
-    review_id,
-    url
-  )
-
-  VALUES (
-    _review_id,
-    _url
-  );
-  SELECT LAST_INSERT_ID() INTO _Id;
-
-END //
-DELIMITER ;
-
- -- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- -- POST characteristics
- -- ***non-user procedure***
- -- ---
-
-DROP PROCEDURE IF EXISTS postCharacteristics;
-DELIMITER //
-
-CREATE PROCEDURE postCharacteristics(IN _product_id INT, IN _name VARCHAR(50), OUT _Id INT)
-
--- test
--- CALL postCharacteristics(
---   1,
---   'Size',
---   @Id
--- );
--- SELECT * FROM characteristics WHERE id = @Id;
--- SET FOREIGN_KEY_CHECKS = 0;
--- DELETE FROM characteristics WHERE id = @Id;
--- SET FOREIGN_KEY_CHECKS = 1;
--- SELECT * FROM characteristics WHERE id = @Id;
-
-BEGIN
-  INSERT INTO characteristics (
-    product_id,
-    name
-  )
-
-  VALUES (
-    _product_id,
-    _name
-  );
-  SELECT LAST_INSERT_ID() INTO _Id;
-
-END //
-DELIMITER ;
-
--- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- -- Insert into reviews_characteristics
- --
- -- ---
-DROP PROCEDURE IF EXISTS insertReviewsCharacteristics;
-DELIMITER //
-
-CREATE PROCEDURE insertReviewsCharacteristics(IN _characteristic_id INT, IN _review_id INT, IN _value INT, OUT _Id INT)
-
--- test
--- CALL insertReviewsCharacteristics(
---   1,
---   1,
---   5,
---   @Id
--- );
--- SELECT * FROM reviews_characteristics WHERE id = @Id;
--- DELETE FROM reviews_characteristics WHERE id = @Id;
--- SELECT * FROM reviews_characteristics WHERE id = @Id;
-
-BEGIN
-  INSERT INTO reviews_characteristics (
-    characteristic_id,
-    review_id,
-    value
-  )
-
-  VALUES (
-    _characteristic_id,
-    _review_id,
-    _value
-  );
-  SELECT LAST_INSERT_ID() INTO _Id;
-
-END //
-DELIMITER ;
-
- -- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  -- Put Review Helpful
  --
  -- ---
@@ -351,16 +137,15 @@ BEGIN
 
   UPDATE reviews
   SET helpfulness = helpfulness + 1
-  WHERE id = _review_id;
+  WHERE id IN (_review_id);
 
 END //
 DELIMITER ;
 
- -- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ --
  -- Put Review Reported
  --
  -- ---
-
 DROP PROCEDURE IF EXISTS putReported;
 DELIMITER //
 
@@ -382,8 +167,106 @@ CREATE PROCEDURE putReported(IN _review_id INT)
 BEGIN
 
   UPDATE reviews
-  SET reported = reported + 1
-  WHERE id = _review_id;
+  SET reported = 1
+  WHERE id IN (_review_id);
+
+END //
+DELIMITER ;
+
+
+ -- ---
+ -- Post Review
+ --
+ -- ---
+DROP PROCEDURE IF EXISTS postReview;
+DELIMITER //
+CREATE PROCEDURE postReview(
+   IN _product_id INT,
+   IN _rating INT,
+   IN _summary VARCHAR(150),
+   IN _body VARCHAR(500),
+   IN _recommend TINYINT,
+   IN _reviewer_name VARCHAR(50),
+   IN _reviewer_email VARCHAR(100),
+   IN _photos JSON,
+   IN _characteristics JSON
+)
+
+BEGIN
+  INSERT INTO reviews (
+      product_id,
+      rating,
+      summary,
+      body,
+      recommend,
+      reviewer_name,
+      reviewer_email
+  )
+
+  VALUES (
+    _product_id,
+    _rating,
+    _summary,
+    _body,
+    _recommend,
+    _reviewer_name,
+    _reviewer_email
+  );
+  CALL postPhotos(LAST_INSERT_ID(), _photos);
+  CALL insertManyReviewsCharacteristics(LAST_INSERT_ID(), _characteristics);
+
+END //
+DELIMITER ;
+
+ -- ---
+ -- Post Photo
+ --
+ -- ---
+DROP PROCEDURE IF EXISTS postPhotos;
+DELIMITER //
+
+CREATE PROCEDURE postPhotos(IN _review_id INT, IN _urls JSON)
+
+BEGIN
+  INSERT INTO photos (
+    review_id,
+    url
+  )
+  SELECT _review_id, url FROM
+    JSON_TABLE(
+      _urls,
+      "$[*]"
+      COLUMNS(
+        url VARCHAR(250) PATH "$"
+      )
+    ) data;
+
+END //
+DELIMITER ;
+
+ -- ---
+ -- Insert Many Into reviews_characteristics Table
+ --
+ -- ---
+DROP PROCEDURE IF EXISTS insertManyReviewsCharacteristics;
+DELIMITER //
+
+CREATE PROCEDURE insertManyReviewsCharacteristics(IN _review_id INT, IN _characteristics JSON)
+
+BEGIN
+  INSERT INTO reviews_characteristics (
+    characteristic_id,
+    value,
+    review_id
+  )
+
+  SELECT characteristic_id, value, _review_id FROM
+    (WITH j AS (
+      SELECT CAST(_characteristics AS JSON) chars
+    )
+    SELECT characteristic_id, JSON_EXTRACT(j.chars, CONCAT('$."', jt.characteristic_id, '"')) value
+      FROM j,
+        JSON_TABLE(JSON_KEYS(chars), '$[*]' COLUMNS (characteristic_id INT PATH '$')) jt) data;
 
 END //
 DELIMITER ;
