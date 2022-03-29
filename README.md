@@ -15,7 +15,7 @@ Custom API to serve the product reviews section to an existing e-commerce client
 Install [PostgreSQL](https://www.postgresql.org/docs/9.3/tutorial-createdb.html)
 
 ```
-$ git clone https://github.com/ycfan23/Atelier-Products-API.git
+$ git clone https://github.com/Sunny-Sky-Tech/Atelier-Reviews-API.git
 ```
 
 Install dependencies with `npm`
